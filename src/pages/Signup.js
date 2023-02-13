@@ -1,25 +1,26 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { UserAuth } from "../context/AuthContext";
+import { auth, db } from "../firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState('');
-  const { signUp } = UserAuth();
   const navigate = useNavigate();
+
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      await signUp(email, password);
+      await createUserWithEmailAndPassword(auth, email, password);
+      await setDoc(doc(db, "users", email), {
+        savedMovies: [],
+      });
       navigate("/");
-    } catch (error) {
-      if(error.code === '400') {
+    } catch(error) {
         setError(error.message)
-      }
-      console.log(error.message)
-
     }
     setEmail("");
     setPassword("");
